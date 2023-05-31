@@ -1,13 +1,15 @@
 package repository
 
 import (
+	message "order/internal/repository/postgres/message"
 	order "order/internal/repository/postgres/order"
 
 	"github.com/dmitryavdonin/gtools/psql"
 )
 
 type Repository struct {
-	Order *order.Repository
+	Order   *order.Repository
+	Message *message.Repository
 }
 
 func NewRepository(pg *psql.Postgres) (*Repository, error) {
@@ -16,7 +18,13 @@ func NewRepository(pg *psql.Postgres) (*Repository, error) {
 		return nil, err
 	}
 
+	message, err := message.New(pg, message.Options{})
+	if err != nil {
+		return nil, err
+	}
+
 	return &Repository{
-		Order: order,
+		Order:   order,
+		Message: message,
 	}, nil
 }

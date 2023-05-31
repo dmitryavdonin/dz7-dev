@@ -6,5 +6,5 @@ import (
 )
 
 func (r *Repository) toDomainOrder(daoOrder *dao.Order) (*order.Order, error) {
-	return order.NewOrderWithId(daoOrder.Id, daoOrder.ProductId, daoOrder.ProductCount, daoOrder.ProductPrice, daoOrder.CreatedAt, daoOrder.ModifiedAt), nil
+	return order.NewOrderWithId(daoOrder.Id, daoOrder.MsgId, daoOrder.ProductId, daoOrder.ProductCount, daoOrder.ProductPrice, daoOrder.CreatedAt, daoOrder.ModifiedAt), nil
 }

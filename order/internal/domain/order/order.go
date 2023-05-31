@@ -8,6 +8,7 @@ import (
 
 type Order struct {
 	id            uuid.UUID
+	msg_id        uuid.UUID
 	product_id    int
 	produtc_count int
 	product_price float32
@@ -16,6 +17,7 @@ type Order struct {
 }
 
 func NewOrder(
+	msg_id uuid.UUID,
 	product_id int,
 	produtc_count int,
 	product_price float32,
@@ -23,6 +25,7 @@ func NewOrder(
 
 	return &Order{
 		id:            uuid.New(),
+		msg_id:        msg_id,
 		product_id:    product_id,
 		produtc_count: produtc_count,
 		product_price: product_price,
@@ -33,6 +36,7 @@ func NewOrder(
 
 func NewOrderWithId(
 	id uuid.UUID,
+	msg_id uuid.UUID,
 	product_id int,
 	produtc_count int,
 	product_price float32,
@@ -41,6 +45,7 @@ func NewOrderWithId(
 ) *Order {
 	return &Order{
 		id:            id,
+		msg_id:        msg_id,
 		product_id:    product_id,
 		produtc_count: produtc_count,
 		product_price: product_price,
@@ -51,6 +56,10 @@ func NewOrderWithId(
 
 func (u Order) Id() uuid.UUID {
 	return u.id
+}
+
+func (u Order) MsgId() uuid.UUID {
+	return u.msg_id
 }
 
 func (u Order) ProductId() int {

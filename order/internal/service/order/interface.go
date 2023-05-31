@@ -12,4 +12,5 @@ type Service interface {
 	UpdateOrder(ctx context.Context, id uuid.UUID, upFn func(oldOrder *order.Order) (*order.Order, error)) (*order.Order, error)
 	DeleteOrderById(ctx context.Context, id uuid.UUID) (err error)
 	ReadOrderById(ctx context.Context, id uuid.UUID) (order *order.Order, err error)
+	ReadOrderByMsgId(ctx context.Context, msg_id uuid.UUID) (order *order.Order, err error)
 }

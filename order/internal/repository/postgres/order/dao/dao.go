@@ -8,6 +8,7 @@ import (
 
 type Order struct {
 	Id           uuid.UUID `db:"id"`
+	MsgId        uuid.UUID `db:"msg_id"`
 	ProductId    int       `db:"product_id"`
 	ProductCount int       `db:"product_count"`
 	ProductPrice float32   `json:"product_price"`
@@ -17,6 +18,7 @@ type Order struct {
 
 var OrderColumns = []string{
 	"id",
+	"msg_id",
 	"product_id",
 	"product_count",
 	"product_price",

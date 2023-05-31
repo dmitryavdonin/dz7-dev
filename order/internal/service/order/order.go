@@ -16,6 +16,10 @@ func (s *service) ReadOrderById(ctx context.Context, id uuid.UUID) (order *order
 	return s.repository.ReadOrderById(ctx, id)
 }
 
+func (s *service) ReadOrderByMsgId(ctx context.Context, msg_id uuid.UUID) (order *order.Order, err error) {
+	return s.repository.ReadOrderByMsgId(ctx, msg_id)
+}
+
 func (s *service) CreateOrder(ctx context.Context, order *order.Order) (err error) {
 	return s.repository.CreateOrder(ctx, order)
 }

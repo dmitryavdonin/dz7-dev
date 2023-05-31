@@ -33,7 +33,7 @@ func (r *Repository) CreateOrder(ctx context.Context, order *order.Order) (err e
 	}(ctx, tx)
 
 	rawQuery := r.Builder.Insert(tableName).Columns(dao.OrderColumns...).Values(
-		order.Id(), order.ProductId(), order.ProductCount(), order.ProductPrice(), order.CreatedAt(), order.ModifiedAt())
+		order.Id(), order.MsgId(), order.ProductId(), order.ProductCount(), order.ProductPrice(), order.CreatedAt(), order.ModifiedAt())
 	query, args, err := rawQuery.ToSql()
 	if err != nil {
 		return
@@ -57,7 +57,7 @@ func (r *Repository) UpdateOrder(ctx context.Context, id uuid.UUID,
 		err = transaction.Finish(ctx, t, err)
 	}(ctx, tx)
 
-	oldOrder, err := r.oneOrderTx(ctx, tx, id)
+	oldOrder, err := r.oneOrderTx(ctx, tx, id, "id")
 	if err != nil {
 		return
 	}
@@ -126,11 +126,24 @@ func (r *Repository) ReadOrderById(ctx context.Context, id uuid.UUID) (order *or
 		err = transaction.Finish(ctx, t, err)
 	}(ctx, tx)
 
-	return r.oneOrderTx(ctx, tx, id)
+	return r.oneOrderTx(ctx, tx, id, "id")
 }
 
-func (r *Repository) oneOrderTx(ctx context.Context, tx pgx.Tx, id uuid.UUID) (order *order.Order, err error) {
-	rawQuery := r.Builder.Select(dao.OrderColumns...).From(tableName).Where("id = ?", id)
+func (r *Repository) ReadOrderByMsgId(ctx context.Context, msg_id uuid.UUID) (order *order.Order, err error) {
+	tx, err := r.Pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return
+	}
+
+	defer func(ctx context.Context, t pgx.Tx) {
+		err = transaction.Finish(ctx, t, err)
+	}(ctx, tx)
+
+	return r.oneOrderTx(ctx, tx, msg_id, "msg_id")
+}
+
+func (r *Repository) oneOrderTx(ctx context.Context, tx pgx.Tx, field_value uuid.UUID, field_name string) (order *order.Order, err error) {
+	rawQuery := r.Builder.Select(dao.OrderColumns...).From(tableName).Where(field_name+" = ?", field_value)
 	query, args, err := rawQuery.ToSql()
 	if err != nil {
 		return
