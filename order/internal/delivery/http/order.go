@@ -7,6 +7,7 @@ import (
 	jsonRequests "order/internal/delivery/http/order"
 	"order/internal/domain/message"
 	"order/internal/domain/order"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -76,10 +77,39 @@ func (d *Delivery) CreateOrder(c *gin.Context) {
 	c.JSON(http.StatusCreated, d.toResponseOrder(order))
 }
 
+// ////////////////////////////////////////////////
 func (d *Delivery) UpdateOrder(c *gin.Context) {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	ifmatch := c.GetHeader("If-Match")
+	if ifmatch == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "If-Match header is not presented"})
+		fmt.Println("UpdateOrder(): FAILED! If-Match header is not presented")
+		return
+	}
+
+	version, err := strconv.Atoi(ifmatch)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "If-Match header cannot be parsed"})
+		fmt.Println("UpdateOrder(): FAILED! If-Match header cannot be parsed = " + ifmatch)
+		return
+	}
+
+	fmt.Println("UpdateOrder(): Order version = " + strconv.Itoa(version))
+
+	exist, err := d.services.Order.ReadOrderById(context.Background(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if exist.Version() != version {
+		c.JSON(http.StatusConflict, gin.H{"error": "order verion conflict"})
+		fmt.Println("UpdateOrder(): FAILED! Order verion conflict new = " + strconv.Itoa(version) + "; old = " + strconv.Itoa(exist.Version()))
 		return
 	}
 
@@ -91,7 +121,15 @@ func (d *Delivery) UpdateOrder(c *gin.Context) {
 	}
 
 	upFn := func(oldOrder *order.Order) (*order.Order, error) {
-		return order.NewOrderWithId(oldOrder.Id(), oldOrder.MsgId(), request.ProductId, request.ProductCount, request.ProductPrice, oldOrder.CreatedAt(), time.Now()), nil
+		return order.NewOrderWithId(
+			oldOrder.Id(),
+			oldOrder.MsgId(),
+			request.ProductId,
+			request.ProductCount,
+			request.ProductPrice,
+			oldOrder.Version(),
+			oldOrder.CreatedAt(),
+			time.Now()), nil
 	}
 
 	order, err := d.services.Order.UpdateOrder(context.Background(), id, upFn)
@@ -129,14 +167,16 @@ func (d *Delivery) ReadOrderById(c *gin.Context) {
 
 	order, err := d.services.Order.ReadOrderById(context.Background(), id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
+
+	c.Header("Etag", strconv.Itoa(order.Version()))
 
 	c.JSON(http.StatusOK, d.toResponseOrder(order))
 }
 
 func (d *Delivery) GetIdempotencyKey(c *gin.Context) {
-	//c.JSON(http.StatusOK, uuid.NewString())
-	c.String(http.StatusOK, uuid.NewString())
+	c.JSON(http.StatusOK, gin.H{"key": uuid.NewString()})
+	//c.String(http.StatusOK, uuid.NewString())
 }

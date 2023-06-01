@@ -1,0 +1,1064 @@
+{
+	"info": {
+		"_postman_id": "84f0b962-07a8-466f-9361-f40b60b7407f",
+		"name": "dz7-dev",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "795865",
+		"_collection_link": "https://otus-dmitryavdonin.postman.co/workspace/otus~82993246-0f01-4d25-adef-9e5b9e2d034b/collection/795865-84f0b962-07a8-466f-9361-f40b60b7407f?action=share&creator=795865&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "Получить ключ идемпотентности",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get Idempotency Key\", function () {\r",
+							"    var responseJSON = JSON.parse(responseBody)\r",
+							"    pm.collectionVariables.set(\"idempotencyKey\", responseJSON[\"key\"])\r",
+							"    console.log(responseJSON);\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/idempotency-key",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"idempotency-key"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "OK",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/idempotency-key",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"idempotency-key"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"key\": \"<string>\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Создать запрос с использованием ключа идемпотентности",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.request.headers.add( { key: 'x-idempotency-key', value: pm.collectionVariables.get('idempotencyKey') } );"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Create Order - attempt 1\", function () {\r",
+							"    console.log(\"X-Idempotancy-Key:\" +  pm.collectionVariables.get(\"idempotencyKey\"))\r",
+							"    console.log(JSON.parse(pm.request.body))\r",
+							"    var responseJSON = JSON.parse(responseBody)\r",
+							"    pm.collectionVariables.set(\"id\", responseJSON[\"id\"])\r",
+							"    console.log(responseJSON);\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"product_id\": {{product_id}},\r\n  \"product_count\": {{product_count}},\r\n  \"product_price\": {{product_price}}  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/order",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "OK",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-idempotency-key",
+								"value": "<string>",
+								"description": "required",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_id\": {{product_id}},\r\n  \"product_count\": {{product_count}},\r\n  \"product_price\": {{product_price}}  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"<string>\",\n    \"product_id\": 1,\n    \"product_count\": 1,\n    \"product_price\": 1.1,\n    \"created_at\": \"<string>\",\n    \"modified_at\": \"<string>\"\n}"
+				},
+				{
+					"name": "Bad Request",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_id\": {{product_id}},\r\n  \"product_count\": {{product_count}},\r\n  \"product_price\": {{product_price}}  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": "{\r\n    \"id\": \"<string>\",\r\n    \"product_id\": 1,\r\n    \"product_count\": 1,\r\n    \"product_price\": 1.1,\r\n    \"created_at\": \"<string>\",\r\n    \"modified_at\": \"<string>\"\r\n}"
+				}
+			]
+		},
+		{
+			"name": "Повторно создать запрос с тем же самым ключом идемпотентности",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.request.headers.add( { key: 'x-idempotency-key', value: pm.collectionVariables.get('idempotencyKey') } );"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Create Order - attempt 2\", function () {\r",
+							"    console.log(\"X-Idempotancy-Key:\" +  pm.collectionVariables.get(\"idempotencyKey\"))\r",
+							"    console.log(JSON.parse(pm.request.body))\r",
+							"    var responseJSON = JSON.parse(responseBody)\r",
+							"    pm.collectionVariables.set(\"id\", responseJSON[\"id\"])\r",
+							"    console.log(responseJSON);\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"product_id\": {{product_id}},\r\n  \"product_count\": {{product_count}},\r\n  \"product_price\": {{product_price}}  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/order",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "OK",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-idempotency-key",
+								"value": "<string>",
+								"description": "required",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_id\": {{product_id}},\r\n  \"product_count\": {{product_count}},\r\n  \"product_price\": {{product_price}}  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order"
+							]
+						}
+					},
+					"status": "Created",
+					"code": 201,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"<string>\",\n    \"product_id\": 1,\n    \"product_count\": 1,\n    \"product_price\": 1.1,\n    \"created_at\": \"<string>\",\n    \"modified_at\": \"<string>\"\n}"
+				},
+				{
+					"name": "Bad Request",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_id\": {{product_id}},\r\n  \"product_count\": {{product_count}},\r\n  \"product_price\": {{product_price}}  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": "{\r\n    \"id\": \"<string>\",\r\n    \"product_id\": 1,\r\n    \"product_count\": 1,\r\n    \"product_price\": 1.1,\r\n    \"created_at\": \"<string>\",\r\n    \"modified_at\": \"<string>\"\r\n}"
+				}
+			]
+		},
+		{
+			"name": "Получить заказ с версией",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get Order with current\", function () {\r",
+							"    pm.collectionVariables.set(\"Etag\", pm.response.headers.get(\"Etag\"))\r",
+							"    console.log(\"Etag: \" + pm.response.headers.get(\"Etag\"));\r",
+							"    console.log(JSON.parse(responseBody));\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/order/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{id}}"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "OK",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/order/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{id}}",
+									"description": "required"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Etag",
+							"value": "0",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"<string>\",\n    \"product_id\": 1,\n    \"product_count\": 1,\n    \"product_price\": 1.1,\n    \"created_at\": \"<string>\",\n    \"modified_at\": \"<string>\"\n}"
+				},
+				{
+					"name": "NotFound",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/order/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{id}}"
+								}
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Etag",
+							"value": "0",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\r\n  \"message\": \"<string>\"\r\n}"
+				}
+			]
+		},
+		{
+			"name": "Обновить заказ с актуальной версией",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.request.headers.add( { key: 'If-Match', value: pm.collectionVariables.get('Etag') } );"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Update Order (actual version)\", function () {\r",
+							"    console.log(\"If-Match: \" + pm.collectionVariables.get(\"Etag\"))\r",
+							"    console.log(JSON.parse(pm.request.body))\r",
+							"    var responseJSON = JSON.parse(responseBody)\r",
+							"    console.log(responseJSON);\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"product_id\": {{product_id1}},\r\n  \"product_count\": {{product_count1}},\r\n  \"product_price\": {{product_price1}}  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/order/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{id}}"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "OK",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "If-Match",
+								"value": "0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_id\": {{product_id1}},\r\n  \"product_count\": {{product_count1}},\r\n  \"product_price\": {{product_price1}}  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{id}}"
+								}
+							]
+						}
+					},
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"<string>\",\n    \"product_id\": 2,\n    \"product_count\": 2,\n    \"product_price\": 22.2,\n    \"created_at\": \"<string>\",\n    \"modified_at\": \"<string>\"\n}"
+				},
+				{
+					"name": "BadRequest",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_id\": {{product_id1}},\r\n  \"product_count\": {{product_count1}},\r\n  \"product_price\": {{product_price1}}  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{id}}"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": "{\r\n  \"message\": \"<string>\"\r\n}"
+				}
+			]
+		},
+		{
+			"name": "Обновить заказ с устаревшей версией",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.request.headers.add( { key: 'If-Match', value: pm.collectionVariables.get('Etag') } );"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Update Order (obsolete version)\", function () {\r",
+							"    console.log(\"If-Match: \" + pm.collectionVariables.get(\"Etag\"))\r",
+							"    console.log(JSON.parse(pm.request.body))\r",
+							"    var responseJSON = JSON.parse(responseBody)\r",
+							"    console.log(responseJSON);\r",
+							"    pm.response.to.have.status(409);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"product_id\": {{product_id2}},\r\n  \"product_count\": {{product_count2}},\r\n  \"product_price\": {{product_price2}}  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/order/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{id}}"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Conflict",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "If-Match",
+								"value": "0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_id\": {{product_id2}},\r\n  \"product_count\": {{product_count2}},\r\n  \"product_price\": {{product_price2}}  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{id}}"
+								}
+							]
+						}
+					},
+					"status": "Conflict",
+					"code": 409,
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": "{\r\n  \"message\": \"<string>\"\r\n}"
+				}
+			]
+		},
+		{
+			"name": "Получить заказ с последней версией",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get Order with latest version\", function () {\r",
+							"    pm.collectionVariables.set(\"Etag\", pm.response.headers.get(\"Etag\"))\r",
+							"    console.log(\"Etag: \" + pm.response.headers.get(\"Etag\"));\r",
+							"    console.log(JSON.parse(responseBody));\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/order/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{id}}"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "OK",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/order/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{id}}",
+									"description": "required"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "Etag",
+							"value": "0",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"<string>\",\n    \"product_id\": 1,\n    \"product_count\": 1,\n    \"product_price\": 1.1,\n    \"created_at\": \"<string>\",\n    \"modified_at\": \"<string>\"\n}"
+				},
+				{
+					"name": "NotFound",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/order/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{id}}"
+								}
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_previewlanguage": null,
+					"header": [
+						{
+							"key": "Etag",
+							"value": "0",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\r\n  \"message\": \"<string>\"\r\n}"
+				}
+			]
+		},
+		{
+			"name": "Обновить заказ с последней версией",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.request.headers.add( { key: 'If-Match', value: pm.collectionVariables.get('Etag') } );"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Update Order (latest version)\", function () {\r",
+							"    console.log(\"If-Match: \" + pm.collectionVariables.get(\"Etag\"))\r",
+							"    console.log(JSON.parse(pm.request.body))\r",
+							"    var responseJSON = JSON.parse(responseBody)\r",
+							"    console.log(responseJSON);\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"product_id\": {{product_id2}},\r\n  \"product_count\": {{product_count2}},\r\n  \"product_price\": {{product_price2}}  \r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/order/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"order",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{id}}"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "OK",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "If-Match",
+								"value": "0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_id\": {{product_id1}},\r\n  \"product_count\": {{product_count1}},\r\n  \"product_price\": {{product_price1}}  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{id}}"
+								}
+							]
+						}
+					},
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"id\": \"<string>\",\n    \"product_id\": 2,\n    \"product_count\": 2,\n    \"product_price\": 22.2,\n    \"created_at\": \"<string>\",\n    \"modified_at\": \"<string>\"\n}"
+				},
+				{
+					"name": "BadRequest",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"product_id\": {{product_id1}},\r\n  \"product_count\": {{product_count1}},\r\n  \"product_price\": {{product_price1}}  \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/order/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"order",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{id}}"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": null,
+					"header": null,
+					"cookie": [],
+					"body": "{\r\n  \"message\": \"<string>\"\r\n}"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://arch.homework:8090",
+			"type": "string"
+		},
+		{
+			"key": "product_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "product_count",
+			"value": "2",
+			"type": "string"
+		},
+		{
+			"key": "product_price",
+			"value": "10.5",
+			"type": "string"
+		},
+		{
+			"key": "idempotencyKey",
+			"value": ""
+		},
+		{
+			"key": "id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "Etag",
+			"value": ""
+		},
+		{
+			"key": "product_id1",
+			"value": "123",
+			"type": "string"
+		},
+		{
+			"key": "product_count1",
+			"value": "9",
+			"type": "string"
+		},
+		{
+			"key": "product_price1",
+			"value": "18.3",
+			"type": "string"
+		},
+		{
+			"key": "product_id2",
+			"value": "67",
+			"type": "string"
+		},
+		{
+			"key": "product_count2",
+			"value": "4",
+			"type": "string"
+		},
+		{
+			"key": "product_price2",
+			"value": "11.8",
+			"type": "string"
+		}
+	]
+}

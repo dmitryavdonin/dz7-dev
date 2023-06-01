@@ -33,7 +33,14 @@ func (r *Repository) CreateOrder(ctx context.Context, order *order.Order) (err e
 	}(ctx, tx)
 
 	rawQuery := r.Builder.Insert(tableName).Columns(dao.OrderColumns...).Values(
-		order.Id(), order.MsgId(), order.ProductId(), order.ProductCount(), order.ProductPrice(), order.CreatedAt(), order.ModifiedAt())
+		order.Id(),
+		order.MsgId(),
+		order.ProductId(),
+		order.ProductCount(),
+		order.ProductPrice(),
+		order.Version(),
+		order.CreatedAt(),
+		order.ModifiedAt())
 	query, args, err := rawQuery.ToSql()
 	if err != nil {
 		return
@@ -71,6 +78,7 @@ func (r *Repository) UpdateOrder(ctx context.Context, id uuid.UUID,
 		Set("product_id", newOrder.ProductId()).
 		Set("product_count", newOrder.ProductCount()).
 		Set("product_price", newOrder.ProductPrice()).
+		Set("version", newOrder.Version()+1).
 		Set("modified_at", newOrder.ModifiedAt()).Where("id = ?", newOrder.Id())
 	query, args, err := rawQuery.ToSql()
 	if err != nil {

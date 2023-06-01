@@ -11,7 +11,8 @@ type Order struct {
 	MsgId        uuid.UUID `db:"msg_id"`
 	ProductId    int       `db:"product_id"`
 	ProductCount int       `db:"product_count"`
-	ProductPrice float32   `json:"product_price"`
+	ProductPrice float32   `db:"product_price"`
+	Version      int       `db:"version"`
 	CreatedAt    time.Time `db:"created_at"`
 	ModifiedAt   time.Time `db:"modified_at"`
 }
@@ -22,6 +23,7 @@ var OrderColumns = []string{
 	"product_id",
 	"product_count",
 	"product_price",
+	"version",
 	"created_at",
 	"modified_at",
 }

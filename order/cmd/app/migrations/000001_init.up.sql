@@ -4,6 +4,7 @@ CREATE TABLE "order" (
     "product_id" int,
     "product_count" int,
     "product_price" float,
+    "version" int,
     "created_at" timestamp not null,
     "modified_at" timestamp not null
 );

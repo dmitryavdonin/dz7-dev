@@ -10,8 +10,9 @@ type Order struct {
 	id            uuid.UUID
 	msg_id        uuid.UUID
 	product_id    int
-	produtc_count int
+	product_count int
 	product_price float32
+	version       int
 	createdAt     time.Time
 	modifiedAt    time.Time
 }
@@ -27,8 +28,9 @@ func NewOrder(
 		id:            uuid.New(),
 		msg_id:        msg_id,
 		product_id:    product_id,
-		produtc_count: produtc_count,
+		product_count: produtc_count,
 		product_price: product_price,
+		version:       0,
 		createdAt:     time.Now(),
 		modifiedAt:    time.Now(),
 	}, nil
@@ -40,6 +42,7 @@ func NewOrderWithId(
 	product_id int,
 	produtc_count int,
 	product_price float32,
+	version int,
 	createdAt time.Time,
 	modifiedAt time.Time,
 ) *Order {
@@ -47,8 +50,9 @@ func NewOrderWithId(
 		id:            id,
 		msg_id:        msg_id,
 		product_id:    product_id,
-		produtc_count: produtc_count,
+		product_count: produtc_count,
 		product_price: product_price,
+		version:       version,
 		createdAt:     createdAt,
 		modifiedAt:    modifiedAt,
 	}
@@ -62,12 +66,16 @@ func (u Order) MsgId() uuid.UUID {
 	return u.msg_id
 }
 
+func (u Order) Version() int {
+	return u.version
+}
+
 func (u Order) ProductId() int {
 	return u.product_id
 }
 
 func (p Order) ProductCount() int {
-	return p.produtc_count
+	return p.product_count
 }
 
 func (p Order) ProductPrice() float32 {
